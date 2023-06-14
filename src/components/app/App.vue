@@ -2,15 +2,18 @@
   <div class="app font-monospace">
     <div class="content">
       <AppInfo 
-      :allMoviesCount="movies.langth"
-      :favouriteMoviesCount="movies.filter(c=>c.favourite).langth"
+      :allMoviesCount="movies.length"
+      :favouriteMoviesCount="movies.filter(c=>c.favourite).length"
       />
       <div class="search-panel">
-        <SearchPanel/>
+        <SearchPanel :updateTermHandler="updateTermHandler"/>
         <AppFilter/>
       </div>
-      <MovieList :movies="movies"/>
-      <MovieAddForm/>
+      <MovieList 
+      :movies="onSearchHandler(movies,term)" 
+      @onToggle="onToggleHandler" 
+      @onRemove="onRemoveHandler"/>
+      <MovieAddForm @createMovie="createMovie"/>
     </div>
   </div>
 </template>
@@ -30,22 +33,51 @@ export default{
         viewers:111,
         favourite:false,
         like:true,
+        id:1
       },
       {
         name: 'qwqd',
         viewers:  123,
         favourite: false,
         like: false,
+        id:2
       },
       {
         name: 'Omaqwqdqr',
         viewers:198,
         favourite:true,
         like: false,
+        id:3
       },
       ],
+      term:''
     }
   },
+  methods:{
+    createMovie(item){
+      this.movies.push(item)
+    },
+    onToggleHandler({id, prop}){
+      this.movies = this.movies.map(item=>{
+        if(item.id==id){
+          return {...item, [prop]: !item[prop]}
+        }
+        return item
+      })
+    },
+    onRemoveHandler(id){
+      this.movies = this.movies.filter(c=>c.id!=id)
+    },
+    onSearchHandler (arr,term){
+      if (term.length == 0) {
+        return arr
+      }
+      return arr.filter(c => c.name.toLowerCase().indexOf(term)>-1)
+    },
+    updateTermHandler(term){
+      this.term = term
+    }
+  }
 }
 </script>
 <style>
