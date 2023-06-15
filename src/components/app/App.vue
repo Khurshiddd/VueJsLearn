@@ -9,7 +9,14 @@
         <SearchPanel :updateTermHandler="updateTermHandler"/>
         <AppFilter :updateFilterHandler="updateFilterHandler" :filterName="filter"/>
       </div>
+      <Box v-if="!movies.length && !isLoading">
+        <p class="text-center fs-3 text-danger">Kinolar yo'q</p>
+      </Box>
+      <Box v-else-if="isLoading" class="d-flex justify-content-center">
+        <Loader/>
+      </Box>
       <MovieList 
+      v-else
       :movies="onFilterHandler(onSearchHandler(movies,term),filter)" 
       @onToggle="onToggleHandler" 
       @onRemove="onRemoveHandler"/>
@@ -28,31 +35,10 @@ export default{
   components: {AppInfo,SearchPanel,AppFilter,MovieList,MovieAddForm},
   data() {
     return {
-      movies: [
-      {
-        name: 'Omar',
-        viewers:111,
-        favourite:false,
-        like:true,
-        id:1
-      },
-      {
-        name: 'qwqd',
-        viewers:  123,
-        favourite: false,
-        like: false,
-        id:2
-      },
-      {
-        name: 'Omaqwqdqr',
-        viewers:198,
-        favourite:true,
-        like: false,
-        id:3
-      },
-      ],
+      movies: [],
       term:'',
-      filter: 'all'
+      filter: 'all',
+      isLoading: false
     }
   },
   methods:{
@@ -94,17 +80,20 @@ export default{
     },
     async fetchMovie(){
       try{
-        const {data} = await axios.get('https://jsonplaceholder.typicode.com/posts?_limit=10')
-        const newArr = data.map(item=>({
-          id: item.id,
-          name: item.title,
-          like: false,
-          favourite: false,
-          viewers: item.id * 10
-        }))
-        this.movies = newArr
+        this.isLoading = true
+          const {data} = await axios.get('https://jsonplaceholder.typicode.com/posts?_limit=10')
+          const newArr = data.map(item=>({
+            id: item.id,
+            name: item.title,
+            like: false,
+            favourite: false,
+            viewers: item.id * 10
+          }))
+          this.movies = newArr
       }catch (error){
         alert(error.message);
+      }finally {
+        this.isLoading = false
       }
     }//https://jsonplaceholder.typicode.com/posts?_limit=10
   },
