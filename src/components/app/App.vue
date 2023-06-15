@@ -23,6 +23,7 @@ import SearchPanel from '../search-panel/SearchPanel.vue';
 import AppFilter from '../app-filter/AppFilter.vue'
 import MovieList from '../movie-list/MovieList.vue'
 import MovieAddForm from '../movie-add-form/MovieAddForm.vue'
+import axios from 'axios'
 export default{
   components: {AppInfo,SearchPanel,AppFilter,MovieList,MovieAddForm},
   data() {
@@ -76,28 +77,40 @@ export default{
       return arr.filter(c => c.name.toLowerCase().indexOf(term)>-1)
     },
     onFilterHandler(arr, filter) {
-			switch (filter) {
-				case 'popular':
-					return arr.filter(c => c.like)
-				case 'mostViewers':
-					return arr.filter(c => c.viewers > 500)
-				default:
-					return arr
-			}
-		},
-		updateTermHandler(term) {
-			this.term = term
-		},
-		updateFilterHandler(filter) {
-			this.filter = filter
-		},
-    logger() {
-      console.log("logger");
+      switch (filter) {
+        case 'popular':
+        return arr.filter(c => c.like)
+        case 'mostViewers':
+        return arr.filter(c => c.viewers > 500)
+        default:
+        return arr
+      }
     },
+    updateTermHandler(term) {
+      this.term = term
+    },
+    updateFilterHandler(filter) {
+      this.filter = filter
+    },
+    async fetchMovie(){
+      try{
+        const {data} = await axios.get('https://jsonplaceholder.typicode.com/posts?_limit=10')
+        const newArr = data.map(item=>({
+          id: item.id,
+          name: item.title,
+          like: false,
+          favourite: false,
+          viewers: item.id * 10
+        }))
+        this.movies = newArr
+      }catch (error){
+        alert(error.message);
+      }
+    }//https://jsonplaceholder.typicode.com/posts?_limit=10
   },
   mounted() {
-    this.logger()
-  }
+    this.fetchMovie()
+  },
 }
 </script>
 <style>
